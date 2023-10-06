@@ -9,13 +9,13 @@ from langchain.chat_models import AzureChatOpenAI
 
 load_dotenv()
 # Load environment variables
-OPENAI_API_KEY = "824fe43e851f4862af326fa83c3d3cfe"
-OPENAI_API_BASE = "https://mtcaichat01.openai.azure.com"
-OPENAI_DEPLOYMENT_VERSION = "2023-03-15-preview"
-OPENAI_DEPLOYMENT_NAME = "gpt432k"
-OPENAI_MODEL_NAME = "gpt4"  
-OPENAI_EMBEDDING_DEPLOYMENT_NAME = "embeddingada002"
-OPENAI_EMBEDDING_MODEL_NAME = "text-embedding-ada-002" 
+# OPENAI_API_KEY = "824fe43e851f4862af326fa83c3d3cfe"
+# OPENAI_API_BASE = "https://mtcaichat01.openai.azure.com"
+# OPENAI_DEPLOYMENT_VERSION = "2023-03-15-preview"
+# OPENAI_DEPLOYMENT_NAME = "gpt432k"
+# OPENAI_MODEL_NAME = "gpt4"  
+# OPENAI_EMBEDDING_DEPLOYMENT_NAME = "embeddingada002"
+# OPENAI_EMBEDDING_MODEL_NAME = "text-embedding-ada-002" 
 
 
 CUR_DIR = os.path.dirname(os.path.abspath(__file__))
