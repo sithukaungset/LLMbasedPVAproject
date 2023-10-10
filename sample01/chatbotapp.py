@@ -1,11 +1,11 @@
 from typing import Dict, List
-
-import requests
+import pandas as pd
+import requests 
 import streamlit as st
 
-API_URL = "http://localhost:8000/writer"
+API_URL = "http://localhost:8000/meeting"
 
-DEFAULT_GENRE = "Thriller"
+DEFAULT_BOT = "Meeting Bot"
 DEFAULT_CHARACTERS = [
     {"name": "James", "characteristics": "An ambitious businessman"},
     {"name": "Kong", "characteristics": "A renowned doctor working at a biological research institute; in a romantic relationship with James"},
@@ -36,7 +36,7 @@ def request_writer_api(
 
 def init_session_state():
     if "genre" not in st.session_state:
-        st.session_state.genre = DEFAULT_GENRE
+        st.session_state.genre = DEFAULT_BOT
     if "characters" not in st.session_state:
         st.session_state.characters = DEFAULT_CHARACTERS
     if "news_text" not in st.session_state:
@@ -46,16 +46,16 @@ def init_session_state():
 
 
 def input_step1_ui():
-    # Step 1: Select genre
-    st.subheader("Step 1: Select Genre")
-    genres = [
-        "Thriller",
+    # Step 1: Select bot type
+    st.subheader("Step 1: Select Bot")
+    bots = [
+        "Meeting room bot",
         "Fantasy",
         "Sci-Fi",
         "Mystery",
         "Romance",
     ]
-    st.session_state.genre = st.selectbox("Select a genre:", genres)
+    st.session_state.genre = st.selectbox("Select a bot:", bots)
 
 
 def input_step2_ui():
@@ -73,22 +73,43 @@ def input_step2_ui():
             }
         )
 
+# This new function allows uploading of Excel files and returns them as DataFrames
 
+def upload_meeting_data():
+    uploaded_file = st.file_uploader("Upload Meeting Room Data (Excel format)", type=["xlsx"])
+    if uploaded_file:
+        meeting_data_df = pd.read_excel(uploaded_file)
+        st.write(meeting_data_df) # Display the uploaded data (optional)
+        return meeting_data_df
+    return None
+
+# Adjust this function to pass meeting room data to the chatbot
 def input_step3_ui():
     # Step 3: Add News Article
-    st.subheader("Step 3: Add News Article")
+    st.subheader("Step 3: Add News Article") 
     news_text = st.text_area(
         "Paste the news article here", value=st.session_state.news_text
     )
     st.session_state.news_text = news_text
 
+    # Upload and process the Excel file
+    meeting_data_df = upload_meeting_data()
+    
+    # Convert the uploaded meeting data to a string format (or any other format your chatbot can use)
+    if meeting_data_df is not None:
+        meeting_info_str = "\n".join([f"{row['Room Name']}: {row['Status']}" for _, row in meeting_data_df.iterrows()])
+    else:
+        meeting_info_str = ""
+
     if st.button("Begin!"):
+        # You'll have to adjust request_writer_api to accept and process meeting_info_str
         st.session_state.result = request_writer_api(
             genre=st.session_state.genre,
             characters=st.session_state.characters,
             news_text=st.session_state.news_text,
+            # Add the meeting_info here 
+            meeting_info=meeting_info_str
         )
-
 
 def characters_ui():
     st.subheader("Added Characters")
@@ -109,7 +130,7 @@ def characters_ui():
 
 def result_ui():
     st.subheader("Result")
-    st.text_area("Your Novel", st.session_state.result, height=600)
+    st.text_area("Your Meeting Room info", st.session_state.result, height=600)
 
 
 def main():
@@ -132,8 +153,26 @@ def main():
     st.markdown("---")
     result_ui()
 
+def main():
+    st.title("Megazone Meeting Room GPT")
+
+    init_session_state()
+
+    col1, col2, col3 = st.columns([1, 1, 1])
+
+    with col1:
+        input_step1_ui()
+    with col2:
+        input_step2_ui()
+    with col3:
+        input_step3_ui()
+
+    st.markdown("---")
+    characters_ui()
+
+    st.markdown("---")
+    result_ui()
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
-
     main()

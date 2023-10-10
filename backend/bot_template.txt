@@ -1,0 +1,13 @@
+[User Request]
+{user_input}
+
+[Meeting Information]
+Date: {meeting_date}
+Time: {meeting_time}
+Duration: {duration} hours
+Participants: {participants}
+
+[Room Data]
+{meeting_info}
+
+Based on the information provided, please assist the user with booking, modifying, or canceling meeting rooms.
