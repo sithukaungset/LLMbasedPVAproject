@@ -7,12 +7,35 @@ API_URL = "http://localhost:8000/chat_response"
 
 DEFAULT_BOT = "Meeting Bot"
 
+def generate_bot_prompt(user_input: str, meeting_date: str, meeting_time: str, duration: str, participants: str, meeting_info: str) -> str:
+    prompt = f"""[User Request]
+{user_input}
 
-def request_writer_api(user_input: str) -> str:
+[Meeting Information]
+Date: {meeting_date}
+Time: {meeting_time}
+Duration: {duration} hours
+Participants: {participants}
+
+[Room Data]
+{meeting_info}
+
+Based on the information provided, please assist the user with booking, modifying, or canceling meeting rooms.
+"""
+    return prompt
+
+def request_writer_api(
+    user_query: str, 
+    meeting_date: str, 
+    meeting_time: str, 
+    duration: str, 
+    participants: str, 
+    meeting_info: str) -> str:
+    structured_prompt = generate_bot_prompt(user_query, meeting_date, meeting_time, duration, participants, meeting_info)
     try:
         resp = requests.post(
             API_URL,
-            json={"user_input": user_input},
+            json={"user_input": structured_prompt},
             timeout=10
         )
         resp.raise_for_status()
@@ -21,10 +44,10 @@ def request_writer_api(user_input: str) -> str:
         return "There was an error communicating with the server."
 
 
+
 def init_session_state():
     st.session_state.setdefault("result", "")
     st.session_state.setdefault("user_query", "")
-
 
 def input_step1_ui():
     st.subheader("Select Bot")
@@ -41,7 +64,18 @@ def input_step1_ui():
 def input_user_query_ui():
     st.subheader("Enter Your Query")
     user_query = st.text_input("Please type your query regarding meeting rooms:")
-    return user_query
+    meeting_date = st.date_input("Meeting Date:")
+    meeting_time = st.time_input("Meeting Time:")
+    duration = st.text_input("Duration (in hours):")
+    participants = st.text_input("Participants (comma-separated):")
+    meeting_info = st.text_area("Room Data:")
+
+    if user_query:  # Check if the user has entered a query
+        response = request_writer_api(user_query, meeting_date, meeting_time, duration, participants, meeting_info)
+        st.write(response)  # Displaying the response on Streamlit
+    
+    return user_query, meeting_date, meeting_time, duration, participants, meeting_info
+
 
 
 def upload_meeting_data():
@@ -119,12 +153,21 @@ def main():
     st.markdown("---")
     result_ui()
 
-    user_query = input_user_query_ui()
+    user_query, meeting_date, meeting_time, duration, participants, meeting_info = input_user_query_ui()
 
-    if user_query and (not st.session_state.user_query or user_query != st.session_state.user_query):
-        st.session_state.user_query = user_query
+    if user_query:
+        structured_prompt = generate_bot_prompt(
+            user_input=user_query,
+            meeting_date=str(meeting_date),
+            meeting_time=str(meeting_time),
+            duration=duration,
+            participants=participants,
+            meeting_info=meeting_info
+        )
 
-        st.session_state.result = request_writer_api(user_input=st.session_state.user_query)
+        # if not st.session_state.user_query or structured_prompt != st.session_state.user_query:
+        #     st.session_state.user_query = structured_prompt
+        #     st.session_state.result = request_writer_api(prompt=st.session_state.user_query)
 
 
 if __name__ == "__main__":
