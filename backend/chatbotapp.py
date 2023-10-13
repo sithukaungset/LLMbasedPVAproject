@@ -35,13 +35,16 @@ def request_writer_api(
     try:
         resp = requests.post(
             API_URL,
-            json={"user_input": structured_prompt},
-            timeout=10
+            json={
+                "user_input": structured_prompt,
+   
+             }
+
         )
         resp.raise_for_status()
         return resp.json().get("results", "Sorry, I couldn't process that request.")
-    except requests.RequestException:
-        return "There was an error communicating with the server."
+    except requests.RequestException as e:
+        return f"There was an error: {str(e)}"
 
 
 
